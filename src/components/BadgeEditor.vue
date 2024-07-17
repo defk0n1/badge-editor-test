@@ -1,5 +1,5 @@
 <template>
-        <Canvas :key="dimensions" ref="editor" :dims="this.dimensions" :qrValue="this.encodedUser"></Canvas>
+        <Canvas :key="dimensions" ref="editor" :dims="this.dimensions" :qrValue="this.encodedUser" :dimsChanged="this.dimsChanged"></Canvas>
         <DimensionsPicker @DimensionsPicked = "changeDimensions"></DimensionsPicker>
         <h1>{{ this.dimensions.height }}</h1>
         <h1>{{ this.dimensions.width }}</h1>
@@ -38,6 +38,7 @@ export default {
             width:500,
             height:500
         },
+            dimsChanged:false,
        
     })
     },
@@ -45,12 +46,20 @@ export default {
         changeDimensions(newDimensions){
             this.dimensions = newDimensions;
             console.log(newDimensions);
-            console.log(this.$refs.editor.dims);
+            if (this.dimsChanged === false) {
+                this.dimsChanged = true;
+                
+            }
+            console.log(this.$refs.editor.dimsChanged);
+
+
 
 
         }
     },
-
+    mounted(){
+        console.log(this.$refs.editor.dims);
+    }
 }
 </script>
 

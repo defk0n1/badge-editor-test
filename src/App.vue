@@ -10,7 +10,7 @@ import BadgeEditor from './components/BadgeEditor.vue'
 
 <template>
     
-   <BadgeEditor :defdimensions="{width:2000,height:3000}"></BadgeEditor>
+   <BadgeEditor></BadgeEditor>
 
 
 </template>

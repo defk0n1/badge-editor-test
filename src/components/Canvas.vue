@@ -12,7 +12,6 @@ import square from "../assets/square.png"
 import text from "../assets/type.png"
 import QrcodeVue from 'qrcode.vue'
 import qricon from "../assets/qr-code.png"
-import type { forEachChild } from 'typescript'
 // import testjson from "../assets/test.json"
 
 
@@ -91,10 +90,12 @@ export default {
 
     },
     addText(){
-        var text = new fabric.Textbox('TEXT BOX',
+        console.log(this.fontfamily);
+        var text = new fabric.Textbox('Hello world',
         { left: 100,
           top: 100,
-          fill: this.textColor 
+          fill: this.textColor ,
+          fontFamily:this.fontfamily
         
         });
 
@@ -132,7 +133,7 @@ export default {
               crossOrigin: "Anonymous"
 
             });
-            img.scaleToWidth(200);
+            // img.scaleToWidth(200);
             canvas.add(img);
           }
         }
@@ -185,7 +186,7 @@ export default {
 
 
           }
-  img.crossOrigin = "Anonymous";      
+  image.crossOrigin = "Anonymous";      
           
 
 
@@ -204,11 +205,24 @@ export default {
 
   },
   async fetchTemplate(){
+    const boolCheck = this.dimsChanged
+    console.log(this.dimsChanged)
+
     try {
       this.template = await fetch("http://localhost:3000/json");
+      console.log(this.template);
+
       const jsontemplate = await this.template.json();
-      console.log(jsontemplate);
+      console.log(jsontemplate[0]);
+      if(boolCheck){
+        jsontemplate[0].dimensions = this.dims
+        console.log(jsontemplate[0]);
+
+      }
       canvas.loadFromJSON(jsontemplate[0]);
+      
+      canvas.setDimensions(jsontemplate[0].dimensions,{backstoreOnly: true})
+
       
       var pugImg = new Image();
       pugImg.onload = (img) => {    
@@ -230,6 +244,7 @@ export default {
       pugImg.src = this.myImage;
       pugImg.crossOrigin = "Anonymous";
 
+
       
 
 
@@ -240,7 +255,32 @@ export default {
 
   },
 
-  async saveTemplate(){
+ saveTemplate(){
+      const json = canvas.toDatalessJSON(["clipPath"]);
+      json.id = "1"
+      json.dimensions = {
+        height:canvas.getHeight(),
+        width:canvas.getWidth()
+      }
+      const out = JSON.stringify(json, null, "\t");
+      fetch('http://localhost:3000/json/1', {
+             method: 'PATCH',
+             headers: {
+            'Content-Type': 'application/json',
+            },
+             body: out,
+        })
+        .then(response => response.json())
+        .then(alert("saved successfully"));
+
+      
+
+  },
+
+  changeFont(){
+    this.fontfamily = this.$refs.font.value;
+
+
 
   }
   
@@ -254,6 +294,7 @@ export default {
         width:500,
         height:500
       },
+   
     qrValue:{
       type: String,
       default: "null"
@@ -262,6 +303,10 @@ export default {
       type: Boolean,
       default:false
 
+    },
+    dimsChanged:{
+      type: Boolean,
+      default:false
     }
 
   },
@@ -278,15 +323,14 @@ export default {
       boxColor:"#FF00FF",
       circleColor:"#FF00FF",
       textColor:"#FF00FF",
-      template:null
+      template:null,
+      fontfamily:"Times New Roman"
+
+      
 
 
       
     }
-  },
-  created(){
-
-
   }
 ,
 
@@ -298,14 +342,20 @@ export default {
       isDrawingMode: false,    
     });
 
-    canvas.setDimensions({
-      width:parseInt(this.dims.width),
-      height:parseInt(this.dims.height),
-
-    },
-  {
-    backstoreOnly: true,
-  });
+  //   canvas.setDimensions({
+  //     width:parseInt(this.dims.width),
+  //     height:parseInt(this.dims.height),
+  //   },
+  // {
+  //   backstoreOnly: true,
+  // });
+  // canvas.setDimensions({
+  //     width:parseInt(this.dims.width),
+  //     height:parseInt(this.dims.height),
+  //   },
+  // {
+  //   backstoreOnly: true,
+  // });
     var aspectRatio = parseInt(this.dims.height)/parseInt(this.dims.width)
 
   canvas.setDimensions({
@@ -317,6 +367,7 @@ export default {
     cssOnly: true,
   });
 
+  
 
 
 
@@ -329,13 +380,31 @@ export default {
  
 
 
-this.fetchTemplate();
+  this.fetchTemplate();
+  canvas.setDimensions({
+      width:(window.innerHeight*0.9)/aspectRatio,
+      height:window.innerHeight*0.9 ,
 
+    },
+  {
+    cssOnly: true,
+  });
+
+  
 
 
 
 canvas.requestRenderAll();
 
+var fonts = ["Pacifico", "VT323", "Quicksand", "Inconsolata"];
+fonts.unshift('Times New Roman');
+var select = document.getElementById("font-family");
+fonts.forEach(function(font) {
+  var option = document.createElement('option');
+  option.innerHTML = font;
+  option.value = font;
+  select.appendChild(option);
+});
 
 
 
@@ -354,10 +423,10 @@ canvas.requestRenderAll();
 <template>
     <div class="canvas-wrapper">
     <canvas id="canvas" style="width: 50vw; height: 70vh"></canvas>
-    <div class="buttons-wrapper"><div> <img @click="addNewBox" src="../assets/square.png"><VaColorInput v-model="boxColor" class="w-28" /></div>
-    <div> <img @click="addCircle" src="../assets/circle.png"><VaColorInput v-model="circleColor" class="w-20" />
+    <div class="buttons-wrapper"><div> <img @click="addNewBox" src="../assets/square.png"><VaColorInput v-model="boxColor" style="width: 10vw;"  /></div>
+    <div> <img @click="addCircle" src="../assets/circle.png"><VaColorInput v-model="circleColor" style="width: 10vw;"/>
     </div>
-    <div> <img  @click="addText" src="../assets/type.png"> <VaColorInput v-model="textColor" class="w-28" /> </div>
+    <div> <img  @click="addText" src="../assets/type.png"> <VaColorInput v-model="textColor" style="width: 10vw;" /> <select id="font-family" ref="font" @change="changeFont"></select></div>
     <div> <img @click="toJson" src="../assets/download.png"><img src="../assets/json-file.png">  </div>
     <div><img @click="toImage" src="../assets/download.png"> <img src="../assets/image.png"></div>
     <div><img  @click="removeSelection" src="../assets/x-circle.png"></div>
@@ -402,14 +471,14 @@ canvas.requestRenderAll();
   justify-content: space-evenly;
   align-items: center;
   height: 60vh;
-  width: fit-content;
+  /* width: fit-content; */
 
 
 }
 
 
 .buttons-wrapper div{
-  width: fit-content;
+  /* width: fit-content; */
   display: flex;
   flex-direction: row;
 
