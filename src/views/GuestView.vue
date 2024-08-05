@@ -1,14 +1,13 @@
 <script setup lang="ts">
-    import { RouterView } from 'vue-router';
+import BadgeEditor from '../components/BadgeEditor.vue';
 
-
-
+console.log("guest view")
 
 </script>
 
 <template>
-    
-    <RouterView />
+
+    <BadgeEditor encodedUser = "hooo"></BadgeEditor>
 
 
 </template>

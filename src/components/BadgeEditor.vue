@@ -1,8 +1,7 @@
 <template>
         <Canvas :key="dimensions" ref="editor" :dims="this.dimensions" :qrValue="this.encodedUser" :dimsChanged="this.dimsChanged"></Canvas>
         <DimensionsPicker @DimensionsPicked = "changeDimensions"></DimensionsPicker>
-        <h1>{{ this.dimensions.height }}</h1>
-        <h1>{{ this.dimensions.width }}</h1>
+
 
 </template>
 
@@ -23,7 +22,7 @@ export default {
         },
         encodedUser: {
             type: String,
-            default:"test qr value"
+            default:"PLACEHOLDER"
             
         }
 
